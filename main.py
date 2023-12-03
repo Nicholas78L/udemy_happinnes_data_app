@@ -1,15 +1,37 @@
-import streamlit as st
-import pandas as pd
-import plotly.express as px
+import streamlit as st  # Библ-ка для написания сайта без html кода
+import pandas as pd     # Библ-ка для создания баз данных из CSV файлов
+import plotly.express as px   # Библ-ка для построения графиков
 
+# Создаём базу данных (dataframe) на основе CSV документа ('happy.csv'):
 df = pd.read_csv('happy.csv')
-headers = df.columns
-print(headers)
 
+# Беспонтовый цикл и условия (код работает и без них), которые вставляем только
+#  для визуальной красоты названия осей координат (заголовки с кол-вом букв > 3
+# - c большой буквы, а аббревиатура 'gdp' (ВВП) - все буквы - заглавные).
+for i in df.columns:   # df.columns выдаёт список ЗАГОЛОВКОВ CSV документа.
+    if len(i) > 3:                  # Если длина заголовка больше 3-х букв, то
+        df[i.capitalize()] = df[i]  # данные из заголовка с маленькой буквы
+    else:                           # сохраняем в заголовке с большой буквы.
+        df[i.upper()] = df[i]  # Иначе сохраняем в загол-ке где все буквы большие
+    del df[i]                  # Удаляем все старые заголовки (с маленькой буквы).
 
-st.title('In Search for Happiness')
-a = st.selectbox('Select the data for the X-axis', [i for i in headers], key='X')
-b = st.selectbox('Select the data for the Y-axis', [i for i in headers], key='Y')
-subtitle = st.subheader(f'{a.capitalize()} and {b.capitalize()}')
-figure = px.scatter(x=df[a], y=df[b], labels={'x': a.capitalize(), 'y': b.capitalize()})
+headers = df.columns  # Сохраняем обновлённые заголовки в переменной 'headers'
+
+st.title('In Search for Happiness')  # Создаём заголовок нашего вебсайта.
+
+# Создаём меню выбора названия ординаты (для оси Х):
+a = st.selectbox('Select the data for the X-axis', [i for i in headers])
+
+# Создаём меню выбора названия абсциссы (для оси У):
+b = st.selectbox('Select the data for the Y-axis', [i for i in headers])
+
+# Создаём подзаголовок (название для нашего графика с применением динамически измененяемых
+subtitle = st.subheader(f'{a} and {b}')  # названий осей Х (а) и У (b) соответственно.
+
+# Задаём параметры фигуры для отображения её на графике, где scatter - разброс,
+# х= и у= - цифровые значения колонок под заголовками, соотв-щим выбранному названию оси,
+# labels - название осей в виде словаря - то, что будет написано около осей графика.
+figure = px.scatter(x=df[a], y=df[b], labels={'x': a, 'y': b})
+
+# Создаём непосредственно сам график:
 st.plotly_chart(figure)
